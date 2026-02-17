@@ -1,0 +1,9 @@
+# Database
+database.sqlite
+
+# System
+.DS_Store
+Thumbs.db
+
+# Vendor (if using Composer later)
+vendor/
