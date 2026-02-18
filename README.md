@@ -4,7 +4,7 @@ Simple user management app using PHP (Native) and Bootstrap.
 ### How to install
 1.  Clone repo
     ```bash
-    git clone <repository-url>
+    git clone https://github.com/Min-Thant-oo/user-management-php
     cd user-management-php
     ```
 
