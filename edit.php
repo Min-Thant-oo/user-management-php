@@ -28,31 +28,29 @@ if (!$user) {
     exit();
 }
 
+$roles = $pdo->query("SELECT * FROM roles ORDER BY name ASC")->fetchAll();
+
 if ($_SERVER["REQUEST_METHOD"] == "POST") {
     $username = trim($_POST['username']);
-    $role = $_POST['role'];
+    $role_id = $_POST['role_id'];
     $password = $_POST['password'];
 
     if (empty($username)) {
         $error = "Username cannot be empty.";
     }
     else {
-        // Update user
         if (!empty($password)) {
-            // Update with new password
             $hashed_password = password_hash($password, PASSWORD_DEFAULT);
-            $stmt = $pdo->prepare("UPDATE users SET username = ?, password = ?, role = ? WHERE id = ?");
-            $result = $stmt->execute([$username, $hashed_password, $role, $id]);
+            $stmt = $pdo->prepare("UPDATE users SET username = ?, password = ?, role_id = ? WHERE id = ?");
+            $result = $stmt->execute([$username, $hashed_password, $role_id, $id]);
         }
         else {
-            // Update without changing password
-            $stmt = $pdo->prepare("UPDATE users SET username = ?, role = ? WHERE id = ?");
-            $result = $stmt->execute([$username, $role, $id]);
+            $stmt = $pdo->prepare("UPDATE users SET username = ?, role_id = ? WHERE id = ?");
+            $result = $stmt->execute([$username, $role_id, $id]);
         }
 
         if ($result) {
             $success = "User updated successfully! <a href='index.php'>Go back</a>";
-            // Refresh user data
             $stmt = $pdo->prepare("SELECT * FROM users WHERE id = ?");
             $stmt->execute([$id]);
             $user = $stmt->fetch(PDO::FETCH_ASSOC);
@@ -97,11 +95,14 @@ endif; ?>
                     </div>
                     <div class="mb-3">
                         <label class="form-label">Role</label>
-                        <select name="role" class="form-select">
-                            <option value="user" <?php echo ($user['role']==='user' ) ? 'selected' : '' ; ?>>User
+                        <select name="role_id" class="form-select">
+                            <?php foreach ($roles as $role): ?>
+                            <option value="<?php echo $role['id']; ?>" <?php echo ($user['role_id']==$role['id'])
+                                ? 'selected' : '' ; ?>>
+                                <?php echo htmlspecialchars($role['name']); ?>
                             </option>
-                            <option value="admin" <?php echo ($user['role']==='admin' ) ? 'selected' : '' ; ?>>Admin
-                            </option>
+                            <?php
+endforeach; ?>
                         </select>
                     </div>
                     <button type="submit" class="btn btn-primary">Update User</button>

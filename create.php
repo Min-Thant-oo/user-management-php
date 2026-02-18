@@ -10,15 +10,18 @@ if (!isset($_SESSION['user_id']) || $_SESSION['role'] !== 'admin') {
     exit();
 }
 
+// Fetch all roles for the dropdown
+$roles = $pdo->query("SELECT * FROM roles ORDER BY name ASC")->fetchAll();
+
 $error = '';
 $success = '';
 
 if ($_SERVER["REQUEST_METHOD"] == "POST") {
     $username = trim($_POST['username']);
     $password = $_POST['password'];
-    $role = $_POST['role'];
+    $role_id = $_POST['role_id'];
 
-    if (empty($username) || empty($password)) {
+    if (empty($username) || empty($password) || empty($role_id)) {
         $error = "Please fill in all fields.";
     }
     else {
@@ -30,8 +33,8 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
         }
         else {
             $hashed_password = password_hash($password, PASSWORD_DEFAULT);
-            $stmt = $pdo->prepare("INSERT INTO users (username, password, role) VALUES (?, ?, ?)");
-            if ($stmt->execute([$username, $hashed_password, $role])) {
+            $stmt = $pdo->prepare("INSERT INTO users (username, password, role_id) VALUES (?, ?, ?)");
+            if ($stmt->execute([$username, $hashed_password, $role_id])) {
                 $success = "User created successfully! <a href='index.php'>Go back</a>";
             }
             else {
@@ -73,9 +76,14 @@ endif; ?>
                     </div>
                     <div class="mb-3">
                         <label class="form-label">Role</label>
-                        <select name="role" class="form-select">
-                            <option value="user">User</option>
-                            <option value="admin">Admin</option>
+                        <select name="role_id" class="form-select" required>
+                            <option value="">Select a Role</option>
+                            <?php foreach ($roles as $role): ?>
+                            <option value="<?php echo $role['id']; ?>">
+                                <?php echo htmlspecialchars($role['name']); ?>
+                            </option>
+                            <?php
+endforeach; ?>
                         </select>
                     </div>
                     <button type="submit" class="btn btn-primary">Create User</button>
